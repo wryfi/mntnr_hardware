@@ -4,7 +4,7 @@ from urllib import parse
 from django.test import TestCase
 from django.urls import reverse
 
-from mountaineer.hardware.models import Cabinet, CabinetAssignment, Datacenter, Server, PowerDistributionUnit
+from mntnr_hardware.models import Cabinet, CabinetAssignment, Datacenter, Server, PowerDistributionUnit
 
 
 class DatacenterApiTests(TestCase):

@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
-from mountaineer.hardware.models import *
+from mntnr_hardware.models import *
 
 
 class CabinetTests(TestCase):

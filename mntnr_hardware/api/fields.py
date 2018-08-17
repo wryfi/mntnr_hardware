@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.compat import NoReverseMatch
 from rest_framework.reverse import reverse
 
+from mntnr_hardware.models import PowerDistributionUnit, Server, NetworkDevice
 
 # This displays the URL to the child of a Device. Could use some work, but functional for now.
 class HyperlinkedDeviceField(serializers.HyperlinkedRelatedField):
@@ -11,7 +12,11 @@ class HyperlinkedDeviceField(serializers.HyperlinkedRelatedField):
         self.lookup_field = kwargs.pop('lookup_field', self.lookup_field)
         self.lookup_url_kwarg = kwargs.pop('lookup_url_kwarg', self.lookup_field)
         self.format = kwargs.pop('format', None)
-        self.model_view_maps = kwargs.pop('model_view_maps')
+        self.model_view_maps = {
+            PowerDistributionUnit: 'api_v1:hardware:powerdistributionunit-detail',
+            Server: 'api_v1:hardware:server-detail',
+            NetworkDevice: 'api_v1:hardware:networkdevice-detail'
+        }
 
         # We include this simply for dependency injection in tests.
         # We can't add it as a class attributes or it would expect an

@@ -1,10 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 
-from mountaineer.hardware.api.serializers import (
+from mntnr_hardware.api.serializers import (
     CabinetSerializer, CabinetAssignmentSerializer, DatacenterSerializer, NetworkDeviceSerializer,
     PduSerializer, PortAssignmentSerializer, ServerSerializer
 )
-from mountaineer.hardware.models import (
+from mntnr_hardware.models import (
     Cabinet, CabinetAssignment, Datacenter, NetworkDevice, PortAssignment, PowerDistributionUnit, Server
 )
 
@@ -26,6 +26,9 @@ class CabinetModelViewSet(SlugModelViewSet):
 class CabinetAssignmentModelViewSet(SlugModelViewSet):
     queryset = CabinetAssignment.objects.all()
     serializer_class = CabinetAssignmentSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
 
 
 class ServerModelViewSet(SlugModelViewSet):
