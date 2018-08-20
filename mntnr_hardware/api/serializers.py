@@ -1,4 +1,7 @@
+import pdb
+
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from mountaineer.core.api import fields as mtnr_fields
 from mountaineer.core.utils import slug
@@ -105,6 +108,7 @@ class DatacenterSerializerEmbedded(DatacenterSerializer):
     class Meta:
         model = Datacenter
         fields = ['url', 'name', 'slug', 'vendor']
+        read_only_fields = ['vendor', 'name', 'url']
 
 
 class CabinetSerializer(serializers.HyperlinkedModelSerializer):
@@ -121,6 +125,16 @@ class CabinetSerializer(serializers.HyperlinkedModelSerializer):
         model = Cabinet
         fields = '__all__'
 
+    def create(self, valid_data):
+        print(valid_data)
+        datacenter_data = valid_data.pop('datacenter')
+        print(datacenter_data)
+        datacenter = Datacenter.objects.get(slug=datacenter_data['slug'])
+        if not datacenter:
+            return Cabinet.objects.create(datacenter=datacenter, **valid_data)
+        else:
+            raise ValidationError('datacenter with slug {} does not exist'.format(datacenter_data['slug']))
+
     def get_power(self, obj):
         return obj.power
 
@@ -130,11 +144,19 @@ class CabinetSerializer(serializers.HyperlinkedModelSerializer):
     def get_power_unallocated(self, obj):
         return obj.power_unallocated
 
+    def update(self, valid_data):
+        print('can we haz update maybe?')
+
 
 class CabinetSerializerEmbedded(CabinetSerializer):
+    slug = serializers.CharField(default=None)
+
     class Meta:
         model = Cabinet
         fields = ['name', 'url', 'slug', 'datacenter']
+
+    def create(self, valid_data):
+        print('HOW ABOUT THIS ONE?')
 
 
 class DeviceSerializer(serializers.Serializer):

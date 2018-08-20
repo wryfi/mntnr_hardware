@@ -110,6 +110,7 @@ class CabinetApiTests(TestCase):
         create_attrs = self.cab3_attributes.copy()
         create_attrs['datacenter'] = self.datacenter_url
         response = self.client.post(self.create_read_url, create_attrs)
+        self.assertEquals(response.status_code, 201)
         data = response.json()
         url_path = parse.urlparse(data.pop('url')).path
         datacenter_path = parse.urlparse(data.pop('datacenter')).path
@@ -121,7 +122,6 @@ class CabinetApiTests(TestCase):
         expected['fasteners'] = 'M5'
         expected['depth'] = '128.125'
         expected['width'] = '19.000'
-        self.assertEquals(response.status_code, 201)
         self.assertEquals(datacenter_path, self.datacenter_url)
         self.assertEquals(reverse('api_v1:hardware:cabinet-detail', kwargs={'slug': slug}), url_path)
         self.assertEquals(data, expected)
