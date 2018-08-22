@@ -1,0 +1,14 @@
+swagger: '2.0'
+info:
+  title: Mountaineer Hardware
+  description: manages hardware resources in Mountaineer
+  version: '1'
+basePath: '/v1'
+paths:
+  /:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.say_hello
+      summary: says hello
+      responses:
+        default:
+          description: success
