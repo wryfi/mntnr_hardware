@@ -1,14 +1,108 @@
-swagger: '2.0'
-info:
-  title: Mountaineer Hardware
-  description: manages hardware resources in Mountaineer
-  version: '1'
-basePath: '/v1'
 paths:
-  /:
+  /hardware:
     get:
       operationId: mntnr_hardware.api_v1.logic.say_hello
       summary: says hello
+      tags: ['hardware']
+      responses:
+        default:
+          description: success
+  /hardware/datacenters:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.datacenters_list
+      summary: lists datacenters
+      tags: ['hardware']
+      responses:
+        default:
+          description: success
+    post:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_create
+      summary: creates a datacenter
+      tags: ['hardware']
+      parameters:
+        - name: datacenter
+          in: body
+          description: the datacenter object to create
+          schema:
+            type: object
+            required:
+              - name
+              - vendor
+              - address
+              - noc_phone
+            properties:
+              name:
+                type: string
+              vendor:
+                type: string
+              address:
+                type: string
+              noc_phone:
+                type: string
+              noc_email:
+                type: string
+              noc_url:
+                type: string
+      responses:
+        default:
+          description: success
+
+
+  /hardware/datacenters/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_detail
+      summary: shows datacenter details
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the datacenter
+      responses:
+        default:
+          description: success
+    delete:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_delete
+      summary: deletes datacenter
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the datacenter
+      responses:
+        default:
+          description: success
+    put:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_update
+      summary: updates a datacenter
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the datacenter
+        - name: datacenter
+          in: body
+          description: the datacenter object to create
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              vendor:
+                type: string
+              address:
+                type: string
+              noc_phone:
+                type: string
+              noc_email:
+                type: string
+              noc_url:
+                type: string
       responses:
         default:
           description: success

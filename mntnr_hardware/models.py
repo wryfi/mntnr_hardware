@@ -5,7 +5,7 @@ from uuid import uuid4
 from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
-from mountaineer.app import db
+from mountaineer.database import db
 from sqlalchemy.ext.declarative import declared_attr
 
 RequiredColumn = partial(db.Column, nullable=False)
