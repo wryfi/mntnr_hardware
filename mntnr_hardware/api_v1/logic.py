@@ -1,6 +1,6 @@
-from uuid import UUID
-
 from mountaineer.app import db
+from strainer import ValidationException
+
 from mntnr_hardware.models import Cabinet, Datacenter
 from .serializers import cabinet_serializer, datacenter_serializer
 
@@ -10,7 +10,10 @@ def say_hello():
 
 
 def datacenter_create(datacenter):
-    deserialized = datacenter_serializer.deserialize(datacenter)
+    try:
+        deserialized = datacenter_serializer.deserialize(datacenter)
+    except ValidationException as ex:
+        return ex.errors, 400
     datacenter = Datacenter(**deserialized)
     db.session.add(datacenter)
     db.session.commit()
@@ -30,7 +33,10 @@ def datacenter_detail(id):
 
 
 def datacenter_update(id, datacenter):
-    deserialized = datacenter_serializer.deserialize(datacenter)
+    try:
+        deserialized = datacenter_serializer.deserialize(datacenter)
+    except ValidationException as ex:
+        return ex.errors, 400
     datacenter = db.session.query(Datacenter).filter(Datacenter.id == id).first()
     for key, value in deserialized.items():
         if value:
@@ -45,7 +51,10 @@ def datacenters_list():
 
 
 def cabinet_create(cabinet):
-    deserialized = cabinet_serializer.deserialize(cabinet)
+    try:
+        deserialized = cabinet_serializer.deserialize(cabinet)
+    except ValidationException as ex:
+        return ex.errors, 400
     dc_data = deserialized.pop('datacenter')
     datacenter = db.session.query(Datacenter).filter(Datacenter.id == dc_data['id']).first()
     if datacenter:
