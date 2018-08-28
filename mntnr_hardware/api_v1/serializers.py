@@ -9,17 +9,12 @@ level would only incur unnecessary overhead.
 
 """
 
-
-from functools import partial
-
 from strainer import (child, field, serializer)
 
-from mountaineer.strain import email_validator, enum_formatter, enum_validator, url_validator, uuid_validator
+from mountaineer.strain import (enum_formatter, email_validator, enum_validator, url_validator, uuid_validator,
+    email_field, enum_field, url_field, uuid_field)
+
 from mntnr_hardware.models import CabinetAttachmentEnum, CabinetFastenerEnum
-
-
-uuid_field = partial(field, validators=[uuid_validator()])
-enum_field = partial(field, formatters=[enum_formatter()])
 
 
 datacenter_serializer = serializer(
