@@ -7,14 +7,17 @@ paths:
       responses:
         default:
           description: success
+
   /hardware/datacenters:
     get:
       operationId: mntnr_hardware.api_v1.logic.datacenters_list
       summary: lists datacenters
       tags: ['hardware']
       responses:
-        default:
-          description: success
+        200:
+          description: list of datacenters
+          schema:
+            $ref: '#/definitions/DatacenterList'
     post:
       operationId: mntnr_hardware.api_v1.logic.datacenter_create
       summary: creates a datacenter
@@ -24,29 +27,12 @@ paths:
           in: body
           description: the datacenter object to create
           schema:
-            type: object
-            required:
-              - name
-              - vendor
-              - address
-              - noc_phone
-            properties:
-              name:
-                type: string
-              vendor:
-                type: string
-              address:
-                type: string
-              noc_phone:
-                type: string
-              noc_email:
-                type: string
-              noc_url:
-                type: string
+            $ref: '#/definitions/Datacenter'
       responses:
-        default:
-          description: success
-
+        201:
+          description: created datacenter
+          schema:
+            $ref: '#/definitions/Datacenter'
 
   /hardware/datacenters/{id}:
     get:
@@ -60,8 +46,10 @@ paths:
           required: true
           description: UUID of the datacenter
       responses:
-        default:
-          description: success
+        200:
+          description: datacenter details
+          schema:
+            $ref: '#/definitions/Datacenter'
     delete:
       operationId: mntnr_hardware.api_v1.logic.datacenter_delete
       summary: deletes datacenter
@@ -89,20 +77,142 @@ paths:
           in: body
           description: the datacenter object to create
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-              vendor:
-                type: string
-              address:
-                type: string
-              noc_phone:
-                type: string
-              noc_email:
-                type: string
-              noc_url:
-                type: string
+            $ref: '#/definitions/DatacenterUpdate'
       responses:
-        default:
-          description: success
+        200:
+          description: datacenter details
+          schema:
+            $ref: '#/definitions/Datacenter'
+
+  /hardware/cabinets:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinets_list
+      summary: lists cabinets
+      tags: ['hardware']
+      responses:
+        200:
+          description: cabinet list
+          schema:
+            $ref: '#/definitions/CabinetList'
+    post:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_create
+      summary: creates a cabinet
+      tags: ['hardware']
+      parameters:
+        - name: cabinet
+          in: body
+          description: the cabinet object to create
+          schema:
+            $ref: '#/definitions/Cabinet'
+      responses:
+        201:
+          description: created cabinet
+          schema:
+            $ref: '#/definitions/Cabinet'
+
+  /hardware/cabinets/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_detail
+      summary: shows details of a cabinet
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the cabinet
+      responses:
+        200:
+          description: cabinet
+          schema:
+            $ref: '#/definitions/Cabinet'
+
+definitions:
+  DatacenterUpdate:
+    type: object
+    properties:
+      name:
+        type: string
+        example: soma
+      vendor:
+        type: string
+        example: hosting.com
+      address:
+        type: string
+        description: where cabinets are
+        example: 630 3rd St, San Francisco CA
+      noc_phone:
+        type: string
+        example: 14155551212
+      noc_email:
+        type: string
+        example: noc@hosting.com
+      noc_url:
+        type: string
+        example: https://hosting.com
+  Datacenter:
+    required:
+      - name
+      - vendor
+      - address
+      - noc_phone
+    allOf:
+      - $ref: '#/definitions/DatacenterUpdate'
+  DatacenterEmbedded:
+    type: object
+    required: ['id']
+    properties:
+      id:
+        type: string
+        description: UUID of the datacenter object
+        example: 3bdd8e5b-3ffb-4053-96fc-3d5fb73b88f9
+      name:
+        type: string
+        example: gateway 2000
+  DatacenterList:
+    type: array
+    items:
+      $ref: '#/definitions/Datacenter'
+  CabinetUpdate:
+    type: object
+    properties:
+      name:
+        type: string
+        example: 'cabinet 1, row 245, level 5'
+      datacenter:
+        $ref: '#/definitions/DatacenterEmbedded'
+      rack_units:
+        type: integer
+        example: 42
+      depth:
+        type: number
+        description: inches from front rack post to rear rack post
+        example: 41.34
+      width:
+        type: number
+        description: inches from left rack post to right rack post
+        example: 19
+      attachment:
+        type: string
+        description: CAGE_NUT_95, DIRECT_ATTACH, or OTHER
+        example: CAGE_NUT_95
+      fastners:
+        type: string
+        description: UNF_10_32, UNC_12_24, M5, M6 or OTHER
+        example: UNF_10_32
+  Cabinet:
+    required:
+      - name
+      - datacenter
+      - rack_units
+      - depth
+      - width
+      - attachment
+      - fasteners
+    allOf:
+      - $ref: '#/definitions/CabinetUpdate'
+  CabinetList:
+    type: array
+    items:
+      $ref: '#/definitions/Cabinet'
+

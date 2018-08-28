@@ -5,22 +5,24 @@ from uuid import uuid4
 from sqlalchemy import Enum, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 
-from mountaineer.database import db
+from mountaineer.app import db
 from sqlalchemy.ext.declarative import declared_attr
 
-RequiredColumn = partial(db.Column, nullable=False)
+
+NotNullColumn = partial(db.Column, nullable=False)
 
 
 class Datacenter(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
-    name = db.Column(db.String(64))
-    vendor = db.Column(db.String(64))
-    address = db.Column(db.String(255))
-    noc_phone = db.Column(db.String(15))
+    name = NotNullColumn(db.String(64), unique=True)
+    vendor = NotNullColumn(db.String(64))
+    address = NotNullColumn(db.String(255))
+    noc_phone = NotNullColumn(db.String(15))
     noc_email = db.Column(db.String(255))
     noc_url = db.Column(db.String(255))
 
     __tablename__ = 'hardware_datacenters'
+    __table_args__ = (UniqueConstraint('vendor', 'address'), )
 
     def __repr__(self):
         return '<Datacenter: {} ({})>'.format(self.name, self.vendor)
@@ -42,12 +44,12 @@ class CabinetFastenerEnum(enum.Enum):
 
 class Cabinet(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
-    name = db.Column(db.String(64))
+    name = NotNullColumn(db.String(64), unique=True)
     datacenter_id = db.Column(UUID(as_uuid=True), db.ForeignKey('hardware_datacenters.id'))
     datacenter = db.relationship('Datacenter', backref=db.backref('cabinets'), lazy=True)
-    rack_units = db.Column(db.Integer)
-    depth = db.Column(db.Numeric(4, 2))
-    width = db.Column(db.Numeric(4, 2))
+    rack_units = NotNullColumn(db.Integer)
+    depth = NotNullColumn(db.Numeric(4, 2))
+    width = NotNullColumn(db.Numeric(4, 2))
     attachment = db.Column(Enum(CabinetAttachmentEnum))
     fasteners = db.Column(Enum(CabinetFastenerEnum))
 
