@@ -11,8 +11,7 @@ level would only incur unnecessary overhead.
 
 from strainer import (child, field, serializer)
 
-from mountaineer.strain import (enum_formatter, email_validator, enum_validator, url_validator, uuid_validator,
-    email_field, enum_field, url_field, uuid_field)
+from mountaineer.strain import enum_validator, email_field, enum_field, url_field, uuid_field
 
 from mntnr_hardware.models import CabinetAttachmentEnum, CabinetFastenerEnum
 
@@ -23,8 +22,8 @@ datacenter_serializer = serializer(
     field('vendor'),
     field('address'),
     field('noc_phone'),
-    field('noc_email', validators=[email_validator()]),
-    field('noc_url', validators=[url_validator()])
+    email_field('noc_email'),
+    url_field('noc_url')
 )
 
 
