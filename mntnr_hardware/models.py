@@ -50,8 +50,8 @@ class Cabinet(db.Model):
     rack_units = NotNullColumn(db.Integer)
     depth = NotNullColumn(db.Numeric(4, 2))
     width = NotNullColumn(db.Numeric(4, 2))
-    attachment = db.Column(Enum(CabinetAttachmentEnum))
-    fasteners = db.Column(Enum(CabinetFastenerEnum))
+    attachment = NotNullColumn(Enum(CabinetAttachmentEnum))
+    fasteners = NotNullColumn(Enum(CabinetFastenerEnum))
 
     __tablename__ = 'hardware_cabinets'
 
@@ -86,12 +86,16 @@ class Cabinet(db.Model):
             return delta
         return 0
 
-    def serialize(self):
+    def serialize(self, detail=False):
         serialized = super().serialize()
         serialized['attachment'] = self.attachment.name
         serialized['fasteners'] = self.fasteners.name
         datacenter_id = serialized.pop('datacenter_id')
         serialized['datacenter'] = {'id': datacenter_id, 'name': self.datacenter.name}
+        if detail:
+            serialized['power'] = self.power
+            serialized['power_allocated'] = self.power_allocated
+            serialized['power_available'] = self.power_available
         return serialized
 
 
@@ -107,18 +111,27 @@ class DeviceDepthEnum(enum.Enum):
 
 class CabinetAssignment(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
-    cabinet_id = db.Column(UUID(as_uuid=True), db.ForeignKey('hardware_cabinets.id'))
+    cabinet_id = NotNullColumn(UUID(as_uuid=True), db.ForeignKey('hardware_cabinets.id'))
     cabinet = db.relationship('Cabinet', backref=db.backref('cabinet_assignments'), lazy=True)
-    device_id = db.Column(UUID(as_uuid=True), db.ForeignKey('hardware_devices.id'))
+    device_id = NotNullColumn(UUID(as_uuid=True), db.ForeignKey('hardware_devices.id'), unique=True)
     device = db.relationship('Device', backref=db.backref('cabinet_assignments'), lazy=True)
-    position = db.Column(db.Integer)
-    orientation = db.Column(Enum(DeviceOrientationEnum))
-    depth = db.Column(Enum(DeviceDepthEnum))
+    position = NotNullColumn(db.Integer)
+    orientation = NotNullColumn(Enum(DeviceOrientationEnum))
+    depth = NotNullColumn(Enum(DeviceDepthEnum))
 
     __tablename__ = 'hardware_cabinet_assignments'
 
     def __repr__(self):
         return '<CabinetAssignment {} in {}>'.format(self.device.id, self.cabinet.name)
+
+    def serialize(self):
+        serialized = {'id': self.id}
+        serialized['cabinet'] = {'id': self.cabinet_id, 'name': self.cabinet.name}
+        serialized['device'] = {'id': self.device_id, 'type': self.device.type}
+        serialized['depth'] = self.depth.name if self.depth else None
+        serialized['orientation'] = self.orientation.name if self.orientation else None
+        serialized['position'] = self.position if self.position is not None else None
+        return serialized
 
 
 class Device(db.Model):
@@ -130,12 +143,12 @@ class Device(db.Model):
 
 
 class DeviceMixin(object):
-    manufacturer = db.Column(db.String(128))
-    model = db.Column(db.String(128))
-    serial = db.Column(db.String(128))
+    manufacturer = NotNullColumn(db.String(128))
+    model = NotNullColumn(db.String(128))
+    serial = NotNullColumn(db.String(128))
     asset_id = db.Column(db.String(36))
     asset_tag = db.Column(db.String(36))
-    rack_units = db.Column(db.Integer())
+    rack_units = NotNullColumn(db.Integer())
     draw = db.Column(db.Integer())
 
     @declared_attr

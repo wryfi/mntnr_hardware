@@ -1,7 +1,7 @@
 from mountaineer.app import db
 from mountaineer.utils import get_object_or_404, validate_uuid
 
-from mntnr_hardware.models import Cabinet, Datacenter
+from mntnr_hardware.models import Cabinet, Datacenter, CabinetAssignment, Device
 
 
 def say_hello():
@@ -51,7 +51,7 @@ def cabinet_create(cabinet):
     cabinet.datacenter = datacenter
     db.session.add(cabinet)
     db.session.commit()
-    return cabinet.serialize(), 201
+    return cabinet.serialize(detail=True), 201
 
 
 @validate_uuid
@@ -65,7 +65,7 @@ def cabinet_delete(id):
 @validate_uuid
 def cabinet_detail(id):
     cabinet = get_object_or_404(Cabinet, Cabinet.id == id)
-    return cabinet.serialize(), 200
+    return cabinet.serialize(detail=True), 200
 
 
 def cabinets_list():
@@ -84,3 +84,49 @@ def cabinet_update(id, cabinet):
             setattr(cab, key, value)
     db.session.commit()
     return cab.serialize(), 200
+
+
+def cabinet_assignment_create(assignment):
+    cab_data, device_data = assignment.pop('cabinet'), assignment.pop('device')
+    cabinet = get_object_or_404(Cabinet, Cabinet.id == cab_data['id'])
+    device = get_object_or_404(Device, Device.id == device_data['id'])
+    cabinet_assignment = CabinetAssignment(**assignment)
+    cabinet_assignment.cabinet = cabinet
+    cabinet_assignment.device = device
+    db.session.commit()
+    return cabinet_assignment.serialize(), 201
+
+
+def cabinet_assignments_list():
+    assignments = db.session.query(CabinetAssignment).all()
+    return [assignment.serialize() for assignment in assignments]
+
+
+@validate_uuid
+def cabinet_assignment_delete(id):
+    assignment = get_object_or_404(CabinetAssignment, CabinetAssignment.id == id)
+    db.session.delete(assignment)
+    db.session.commit()
+    return {'deleted': 'cabinet-assignment {}'.format(id)}
+
+
+@validate_uuid
+def cabinet_assignment_detail(id):
+    assignment = get_object_or_404(CabinetAssignment, CabinetAssignment.id == id)
+    return assignment.serialize(), 200
+
+
+@validate_uuid
+def cabinet_assignment_update(id, assignment):
+    assigned = get_object_or_404(CabinetAssignment, CabinetAssignment.id == id)
+    if assignment.get('cabinet'):
+        cabinet = assignment.pop('cabinet')
+        assignment['cabinet'] = get_object_or_404(Cabinet, Cabinet.id == cabinet['id'])
+    if assignment.get('device'):
+        device = assignment.pop('device')
+        assignment['device'] = get_object_or_404(Device, Device.id == device['id'])
+    for key, value in assignment.items():
+        if value is not None:
+            setattr(assigned, key, value)
+    db.session.commit()
+    return assigned.serialize(), 200
