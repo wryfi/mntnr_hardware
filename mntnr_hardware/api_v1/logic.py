@@ -1,8 +1,7 @@
 from mountaineer.app import db
-from strainer import ValidationException
+from mountaineer.utils import get_object_or_404, validate_uuid
 
 from mntnr_hardware.models import Cabinet, Datacenter
-from .serializers import cabinet_serializer, datacenter_serializer
 
 
 def say_hello():
@@ -10,71 +9,78 @@ def say_hello():
 
 
 def datacenter_create(datacenter):
-    try:
-        deserialized = datacenter_serializer.deserialize(datacenter)
-    except ValidationException as ex:
-        return ex.errors, 400
-    datacenter = Datacenter(**deserialized)
+    datacenter = Datacenter(**datacenter)
     db.session.add(datacenter)
     db.session.commit()
-    return datacenter_serializer.serialize(datacenter), 201
+    return datacenter.serialize(), 201
 
 
+@validate_uuid
 def datacenter_delete(id):
-    datacenter = db.session.query(Datacenter).filter(Datacenter.id == id).first()
+    datacenter = get_object_or_404(Datacenter, Datacenter.id == id)
     db.session.delete(datacenter)
     db.session.commit()
     return {'deleted': 'datacenter {}'.format(id)}, 200
 
 
+@validate_uuid
 def datacenter_detail(id):
-    datacenter = db.session.query(Datacenter).filter(Datacenter.id == id).first()
-    return datacenter_serializer.serialize(datacenter)
+    datacenter = get_object_or_404(Datacenter, Datacenter.id == id)
+    return datacenter.serialize(), 201
 
 
+@validate_uuid
 def datacenter_update(id, datacenter):
-    try:
-        deserialized = datacenter_serializer.deserialize(datacenter)
-    except ValidationException as ex:
-        return ex.errors, 400
-    datacenter = db.session.query(Datacenter).filter(Datacenter.id == id).first()
-    for key, value in deserialized.items():
+    dc = get_object_or_404(Datacenter, Datacenter.id == id)
+    for key, value in datacenter.items():
         if value:
-            setattr(datacenter, key, value)
+            setattr(dc, key, value)
     db.session.commit()
-    return datacenter_serializer.serialize(datacenter), 200
+    return dc.serialize(), 201
 
 
 def datacenters_list():
     datacenters = db.session.query(Datacenter).all()
-    return [datacenter_serializer.serialize(datacenter) for datacenter in datacenters]
+    return [datacenter.serialize() for datacenter in datacenters]
 
 
 def cabinet_create(cabinet):
-    try:
-        deserialized = cabinet_serializer.deserialize(cabinet)
-    except ValidationException as ex:
-        return ex.errors, 400
-    dc_data = deserialized.pop('datacenter')
-    datacenter = db.session.query(Datacenter).filter(Datacenter.id == dc_data['id']).first()
-    if datacenter:
-        cabinet = Cabinet(**deserialized)
-        cabinet.datacenter = datacenter
-        db.session.add(cabinet)
-        db.session.commit()
-        return cabinet_serializer.serialize(cabinet), 201
-    else:
-        return {'error': 'datacenter not found'}, 400
+    dc = cabinet.pop('datacenter')
+    datacenter = get_object_or_404(Datacenter, Datacenter.id == dc['id'])
+    cabinet = Cabinet(**cabinet)
+    cabinet.datacenter = datacenter
+    db.session.add(cabinet)
+    db.session.commit()
+    return cabinet.serialize(), 201
 
 
+@validate_uuid
+def cabinet_delete(id):
+    cabinet = get_object_or_404(Cabinet, Cabinet.id == id)
+    db.session.delete(cabinet)
+    db.session.commit()
+    return {'deleted': 'cabinet {}'.format(id)}, 200
+
+
+@validate_uuid
 def cabinet_detail(id):
-    cabinet = db.session.query(Cabinet).filter(Cabinet.id == id).first()
-    if cabinet:
-        return cabinet_serializer.serialize(cabinet), 200
-    else:
-        return {'error': 'could not find cabinet'}, 404
+    cabinet = get_object_or_404(Cabinet, Cabinet.id == id)
+    return cabinet.serialize(), 200
 
 
 def cabinets_list():
     cabinets = db.session.query(Cabinet).all()
-    return [cabinet_serializer.serialize(cabinet) for cabinet in cabinets], 200
+    return [cabinet.serialize() for cabinet in cabinets], 200
+
+
+@validate_uuid
+def cabinet_update(id, cabinet):
+    cab = get_object_or_404(Cabinet, Cabinet.id == id)
+    dc = cabinet.pop('datacenter')
+    if dc.get('id'):
+        cabinet['datacenter'] = get_object_or_404(Datacenter, Datacenter.id == dc['id'])
+    for key, value in cabinet.items():
+        if value:
+            setattr(cab, key, value)
+    db.session.commit()
+    return cab.serialize(), 200

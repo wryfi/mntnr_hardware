@@ -86,6 +86,14 @@ class Cabinet(db.Model):
             return delta
         return 0
 
+    def serialize(self):
+        serialized = super().serialize()
+        serialized['attachment'] = self.attachment.name
+        serialized['fasteners'] = self.fasteners.name
+        datacenter_id = serialized.pop('datacenter_id')
+        serialized['datacenter'] = {'id': datacenter_id, 'name': self.datacenter.name}
+        return serialized
+
 
 class DeviceOrientationEnum(enum.Enum):
     FRONT = 'front'

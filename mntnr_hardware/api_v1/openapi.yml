@@ -126,6 +126,40 @@ paths:
           description: cabinet
           schema:
             $ref: '#/definitions/Cabinet'
+    delete:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_delete
+      summary: deletes cabinet
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the cabinet
+      responses:
+        200:
+          description: cabinet deleted
+    put:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_update
+      summary: updates cabinet
+      tags: ['hardware']
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: UUID of the cabinet
+        - name: cabinet
+          in: body
+          description: cabinet json
+          schema:
+            $ref: '#/definitions/CabinetUpdate'
+      responses:
+        200:
+          description: updated cabinet
+          schema:
+            $ref: '#/definitions/Cabinet'
+
 
 definitions:
   DatacenterUpdate:
@@ -146,9 +180,11 @@ definitions:
         example: 14155551212
       noc_email:
         type: string
+        format: email
         example: noc@hosting.com
       noc_url:
         type: string
+        format: url
         example: https://hosting.com
   Datacenter:
     required:
@@ -158,17 +194,23 @@ definitions:
       - noc_phone
     allOf:
       - $ref: '#/definitions/DatacenterUpdate'
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 95833eff-0e68-4137-95a9-23a40cca3b11
   DatacenterEmbedded:
     type: object
     required: ['id']
     properties:
       id:
         type: string
+        format: uuid
         description: UUID of the datacenter object
         example: 3bdd8e5b-3ffb-4053-96fc-3d5fb73b88f9
       name:
         type: string
-        example: gateway 2000
+        example: hurricane electric
   DatacenterList:
     type: array
     items:
@@ -178,7 +220,7 @@ definitions:
     properties:
       name:
         type: string
-        example: 'cabinet 1, row 245, level 5'
+        example: 'c23-r55-l7'
       datacenter:
         $ref: '#/definitions/DatacenterEmbedded'
       rack_units:
@@ -194,10 +236,12 @@ definitions:
         example: 19
       attachment:
         type: string
+        format: cabinet_attachment_enum
         description: CAGE_NUT_95, DIRECT_ATTACH, or OTHER
         example: CAGE_NUT_95
-      fastners:
+      fasteners:
         type: string
+        format: cabinet_fastener_enum
         description: UNF_10_32, UNC_12_24, M5, M6 or OTHER
         example: UNF_10_32
   Cabinet:
