@@ -1,0 +1,132 @@
+paths:
+  /hardware/datacenters:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.datacenters_list
+      summary: lists datacenters
+      tags: ['hardware']
+      responses:
+        200:
+          description: list of datacenters
+          schema:
+            $ref: '#/definitions/DatacenterList'
+    post:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_create
+      summary: creates a datacenter
+      tags: ['hardware']
+      parameters:
+      - name: datacenter
+        in: body
+        description: the datacenter object to create
+        schema:
+          $ref: '#/definitions/Datacenter'
+      responses:
+        201:
+          description: created datacenter
+          schema:
+            $ref: '#/definitions/Datacenter'
+  /hardware/datacenters/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_detail
+      summary: shows datacenter details
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the datacenter
+      responses:
+        200:
+          description: datacenter details
+          schema:
+            $ref: '#/definitions/Datacenter'
+    delete:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_delete
+      summary: deletes datacenter
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the datacenter
+      responses:
+        default:
+          description: success
+    put:
+      operationId: mntnr_hardware.api_v1.logic.datacenter_update
+      summary: updates a datacenter
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the datacenter
+      - name: datacenter
+        in: body
+        description: the datacenter object to create
+        schema:
+          $ref: '#/definitions/DatacenterUpdate'
+      responses:
+        200:
+          description: datacenter details
+          schema:
+            $ref: '#/definitions/Datacenter'
+
+definitions:
+  DatacenterUpdate:
+    type: object
+    properties:
+      name:
+        type: string
+        example: soma
+      vendor:
+        type: string
+        example: hosting.com
+      address:
+        type: string
+        description: where cabinets are
+        example: 630 3rd St, San Francisco CA
+      noc_phone:
+        type: string
+        example: 14155551212
+      noc_email:
+        type: string
+        format: email
+        example: noc@hosting.com
+      noc_url:
+        type: string
+        format: url
+        example: https://hosting.com
+  Datacenter:
+    required:
+    - name
+    - vendor
+    - address
+    - noc_phone
+    allOf:
+    - $ref: '#/definitions/DatacenterUpdate'
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 95833eff-0e68-4137-95a9-23a40cca3b11
+  DatacenterEmbedded:
+    type: object
+    required: ['id']
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: UUID of the datacenter object
+        example: 3bdd8e5b-3ffb-4053-96fc-3d5fb73b88f9
+      name:
+        type: string
+        description: datacenter name
+        example: Layer42
+        readOnly: true
+  DatacenterList:
+    type: array
+    items:
+      $ref: '#/definitions/Datacenter'

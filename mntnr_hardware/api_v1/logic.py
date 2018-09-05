@@ -1,7 +1,7 @@
 from mountaineer.app import db
 from mountaineer.utils import get_object_or_404, validate_uuid
 
-from mntnr_hardware.models import Cabinet, Datacenter, CabinetAssignment, Device
+from mntnr_hardware.models import Cabinet, Datacenter, CabinetAssignment, Device, Server
 
 
 def say_hello():
@@ -130,3 +130,18 @@ def cabinet_assignment_update(id, assignment):
             setattr(assigned, key, value)
     db.session.commit()
     return assigned.serialize(), 200
+
+
+def servers_list():
+    servers = db.session.query(Server).all()
+    return [server.serialize() for server in servers]
+
+
+@validate_uuid
+def server_detail(id):
+    server = get_object_or_404(Server, Server.id == id)
+    return server.serialize()
+
+
+def server_create():
+    pass

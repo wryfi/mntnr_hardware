@@ -149,7 +149,7 @@ class DeviceMixin(object):
     asset_id = db.Column(db.String(36))
     asset_tag = db.Column(db.String(36))
     rack_units = NotNullColumn(db.Integer())
-    draw = db.Column(db.Integer())
+    draw = db.Column(db.Integer(), default=0)
 
     @declared_attr
     def __table_args__(cls):
@@ -174,6 +174,14 @@ class DeviceMixin(object):
     def pdus(self):
         return [(assigned.device, assigned.device_port) for assigned in self.assigned_ports if type(assigned.device) == PowerDistributionUnit]
 
+    def serialize(self):
+        serialized = super().serialize()
+        serialized['cabinet'] = self.cabinet.name
+        serialized['location'] = ','.join([self.location[0].name, str(self.location[1])])
+        serialized['pdus'] = self.pdus
+        serialized['uplinks'] = self.uplinks
+        return serialized
+
     @property
     def uplinks(self):
         return [(assigned.device, assigned.device_port) for assigned in self.assigned_ports if type(assigned.device) == NetworkDevice]
@@ -181,8 +189,8 @@ class DeviceMixin(object):
 
 class Server(DeviceMixin, Device):
     id = db.Column(UUID(as_uuid=True), db.ForeignKey('hardware_devices.id'), primary_key=True)
-    memory = db.Column(db.Integer())
-    cores = db.Column(db.Integer())
+    memory = NotNullColumn(db.Integer())
+    cores = NotNullColumn(db.Integer())
 
     __tablename__ = 'hardware_servers'
     __mapper_args__ = {'polymorphic_identity': 'server'}

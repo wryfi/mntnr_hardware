@@ -1,0 +1,137 @@
+paths:
+  /hardware/cabinet-assignments:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_assignments_list
+      summary: lists cabinet assignments
+      tags: ['hardware']
+      responses:
+        200:
+          description: cabinet assignment list
+          schema:
+            $ref: '#/definitions/CabinetAssignmentList'
+    post:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_assignment_create
+      summary: assigns a device to a cabinet
+      tags: ['hardware']
+      parameters:
+      - name: assignment
+        in: body
+        description: the cabinet assignment object to create
+        schema:
+          $ref: '#/definitions/CabinetAssignmentUpdate'
+      responses:
+        201:
+          description: cabinet assignment
+          schema:
+            $ref: '#/definitions/CabinetAssignment'
+
+  /hardware/cabinet-assignments/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_assignment_detail
+      summary: shows details of cabinet assignment
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the assignment
+      responses:
+        200:
+          description: cabinet assignment
+          schema:
+            $ref: '#/definitions/CabinetAssignment'
+    delete:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_assignment_delete
+      summary: deletes cabinet assignment
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of assignment to delete
+      responses:
+        200:
+          description: deleted
+    put:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_assignment_update
+      summary: updates cabinet assignment
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the assignment
+      - name: assignment
+        in: body
+        description: assignment json
+        schema:
+          $ref: '#/definitions/CabinetAssignmentUpdate'
+      responses:
+        200:
+          description: updated
+          schema:
+            $ref: '#/definitions/CabinetAssignment'
+
+definitions:
+  CabinetAssignment:
+    type: object
+    allOf:
+    - $ref: '#/definitions/CabinetAssignmentUpdate'
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: assignment uuid
+        example: fa069c96-1b73-42e5-80f1-32bdfaffec70
+  CabinetAssignmentList:
+    type: array
+    items:
+      $ref: '#/definitions/CabinetAssignment'
+  CabinetAssignmentCreate:
+    type: object
+    required:
+    - cabinet
+    - device
+    - depth
+    - orientation
+    - position
+    allOf:
+    - $ref: '#/definitions/CabinetAssignmentUpdate'
+  CabinetAssignmentUpdate:
+    type: object
+    properties:
+      cabinet:
+        type: object
+        required: ['id']
+        properties:
+          id:
+            type: string
+            format: uuid
+            description: cabinet id
+            example: c19c2653-7858-4701-bb44-899efccb7043
+      device:
+        type: object
+        required: ['id']
+        properties:
+          id:
+            type: string
+            format: uuid
+            description: device id
+            example: 8c40096e-60a7-46e8-a679-a09aec9295f8
+      depth:
+        type: string
+        format: device_depth_enum
+        description: HALF or FULL
+        example: HALF
+      orientation:
+        type: string
+        format: device_orientation_enum
+        description: FRONT or REAR
+        example: FRONT
+      position:
+        type: integer
+        description: which rack slot the device starts in
+        example: 1

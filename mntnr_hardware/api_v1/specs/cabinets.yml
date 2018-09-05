@@ -1,0 +1,145 @@
+paths:
+  /hardware/cabinets:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinets_list
+      summary: lists cabinets
+      tags: ['hardware']
+      responses:
+        200:
+          description: cabinet list
+          schema:
+            $ref: '#/definitions/CabinetList'
+    post:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_create
+      summary: creates a cabinet
+      tags: ['hardware']
+      parameters:
+      - name: cabinet
+        in: body
+        description: the cabinet object to create
+        schema:
+          $ref: '#/definitions/Cabinet'
+      responses:
+        201:
+          description: created cabinet
+          schema:
+            $ref: '#/definitions/CabinetDetail'
+  /hardware/cabinets/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_detail
+      summary: shows details of a cabinet
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the cabinet
+      responses:
+        200:
+          description: cabinet
+          schema:
+            $ref: '#/definitions/CabinetDetail'
+    delete:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_delete
+      summary: deletes cabinet
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the cabinet
+      responses:
+        200:
+          description: cabinet deleted
+    put:
+      operationId: mntnr_hardware.api_v1.logic.cabinet_update
+      summary: updates cabinet
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the cabinet
+      - name: cabinet
+        in: body
+        description: cabinet json
+        schema:
+          $ref: '#/definitions/CabinetUpdate'
+      responses:
+        200:
+          description: updated cabinet
+          schema:
+            $ref: '#/definitions/Cabinet'
+
+definitions:
+  CabinetUpdate:
+    type: object
+    properties:
+      name:
+        type: string
+        example: 'c23-r55-l7'
+      datacenter:
+        $ref: '#/definitions/DatacenterEmbedded'
+      rack_units:
+        type: integer
+        example: 42
+      depth:
+        type: number
+        description: inches from front rack post to rear rack post
+        example: 41.34
+      width:
+        type: number
+        description: inches from left rack post to right rack post
+        example: 19
+      attachment:
+        type: string
+        format: cabinet_attachment_enum
+        description: CAGE_NUT_95, DIRECT_ATTACH, or OTHER
+        example: CAGE_NUT_95
+      fasteners:
+        type: string
+        format: cabinet_fastener_enum
+        description: UNF_10_32, UNC_12_24, M5, M6 or OTHER
+        example: UNF_10_32
+  Cabinet:
+    required:
+    - name
+    - datacenter
+    - rack_units
+    - depth
+    - width
+    - attachment
+    - fasteners
+    allOf:
+    - $ref: '#/definitions/CabinetUpdate'
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: c6ab6f4b-87f8-454f-b781-e8a33e032be6
+  CabinetDetail:
+    allOf:
+    - $ref: '#/definitions/Cabinet'
+    properties:
+      power:
+        type: integer
+        description: total power (watts) provided by assigned PDUs
+        example: 6240
+        readOnly: true
+      power_allocated:
+        type: integer
+        description: power (watts) allocated to devices in cabinet
+        example: 405
+        readOnly: true
+      power_available:
+        type: integer
+        description: power (watts) not yet allocated
+        example: 5835
+        readOnly: true
+  CabinetList:
+    type: array
+    items:
+      $ref: '#/definitions/Cabinet'
