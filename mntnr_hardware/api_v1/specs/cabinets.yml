@@ -143,3 +143,12 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/Cabinet'
+  CabinetEmbedded:
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: cdc192cf-daea-4aa4-85d7-6ea82c9f3ccd
+      name:
+        type: string
+        example: 'c23-r55-l7'

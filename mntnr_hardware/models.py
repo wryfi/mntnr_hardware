@@ -176,10 +176,10 @@ class DeviceMixin(object):
 
     def serialize(self):
         serialized = super().serialize()
-        serialized['cabinet'] = self.cabinet.name
-        serialized['location'] = ','.join([self.location[0].name, str(self.location[1])])
-        serialized['pdus'] = self.pdus
-        serialized['uplinks'] = self.uplinks
+        if self.cabinet:
+            serialized['cabinet'] = {'name': self.cabinet.name, 'id': self.cabinet.id}
+        serialized['pdus'] = self.pdus if self.pdus else None
+        serialized['uplinks'] = self.uplinks if self.uplinks else None
         return serialized
 
     @property

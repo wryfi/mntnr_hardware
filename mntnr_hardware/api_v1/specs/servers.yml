@@ -13,65 +13,102 @@ paths:
       operationId: mntnr_hardware.api_v1.logic.server_create
       summary: creates a server
       tags: ['hardware']
+      parameters:
+        - name: server
+          in: body
+          description: server object
+          schema:
+            $ref: '#/definitions/ServerCreate'
       responses:
         200:
           description: server details
           schema:
             $ref: '#/definitions/Server'
+  /hardware/server/{id}:
+    get:
+      operationId: mntnr_hardware.api_v1.logic.server_detail
+      summary: displays details about a server
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the server
+      responses:
+        200:
+          description: server details
+          schema:
+            $ref: '#/definitions/Server'
+    put:
+      operationId: mntnr_hardware.api_v1.logic.server_update
+      summary: update a server
+      tags: ['hardware']
+      parameters:
+      - name: id
+        type: string
+        in: path
+        required: true
+        description: UUID of the server
+      - name: server
+        in: body
+        description: server object
+        schema:
+          $ref: '#/definitions/ServerUpdate'
+      responses:
+        200:
+          description: server updated
+          schema:
+            $ref: '#/definitions/Server'
 
 definitions:
-  Server:
+  ServerCreate:
     type: object
+    required:
+      - manufacturer
+      - model
+      - serial
+      - rack_units
+      - memory
+      - cores
     properties:
-      manufacturer:
-        type: string
-        description: server manufacturer/system integrator
-        example: Nutanix
-      model:
-        type: string
-        description: server model name/number
-        example: NX-6035-G5
-      serial:
-        type: string
-        description: server serial number
-        example: ZM16AS188555
-      asset_id:
-        type: string
-        description: identifier in external asset tracker
-        example: 1N23Z4
-      asset_tag:
-        type: string
-        description: asset tag assigned to device
-        example: 123456
-      draw:
-        type: integer
-        description: power draw (in watts)
-        example: 456
       memory:
         type: integer
         description: server RAM (in GiB)
         example: 512
-      cabinet:
-        type: string
-        description: cabinet the server is asssigned to
-        example: c23-r55-l7
-        readOnly: true
-      location:
-        type: string
-        description: cabinet and position the server is assigned to
-        example: c23-r55-l7, 38
-        readOnly: true
-      pdus:
-        type: string
-        description: PDUs the server is connected to
-        example: pdu-124
-        readOnly: true
-      uplinks:
-        type: string
-        description: netork devices the server is connected to
-        example: netdev-123
-        readOnly: true
+      cores:
+        type: integer
+        description: number of CPU cores
+        example: 32
+    allOf:
+      - $ref: '#/definitions/DeviceCreate'
+  Server:
+    type: object
+    allOf:
+      - $ref: '#/definitions/Device'
+    properties:
+      memory:
+        type: integer
+        description: server RAM (in GiB)
+        example: 512
+      cores:
+        type: integer
+        description: number of CPU cores
+        example: 32
   ServerList:
     type: array
     items:
       $ref: '#/definitions/Server'
+  ServerUpdate:
+    type: object
+    properties:
+      memory:
+        type: integer
+        description: server RAM (in GiB)
+        example: 512
+      cores:
+        type: integer
+        description: number of CPU cores
+        example: 32
+    allOf:
+      - $ref: '#/definitions/DeviceUpdate'

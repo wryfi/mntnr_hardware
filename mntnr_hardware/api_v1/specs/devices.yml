@@ -1,0 +1,63 @@
+definitions:
+  DeviceUpdate:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+        description: server manufacturer/system integrator
+        example: Nutanix
+      model:
+        type: string
+        description: server model name/number
+        example: NX-6035-G5
+      serial:
+        type: string
+        description: server serial number
+        example: ZM16AS188555
+      rack_units:
+        type: integer
+        description: number of rack units occupied by device
+        example: 4
+      asset_id:
+        type: string
+        description: identifier in external asset tracker
+        example: 1N23Z4
+      asset_tag:
+        type: string
+        description: asset tag assigned to device
+        example: '123456'
+      draw:
+        type: integer
+        description: power draw of the device (watts)
+        example: 480
+  DeviceCreate:
+    type: object
+    required:
+      - manufacturer
+      - model
+      - serial
+      - rack_units
+    allOf:
+      - $ref: '#/definitions/DeviceUpdate'
+  Device:
+    allOf:
+      - $ref: '#/definitions/DeviceCreate'
+    properties:
+      cabinet:
+        $ref: '#/definitions/CabinetEmbedded'
+        readOnly: true
+      location:
+        type: string
+        description: cabinet and position the server is assigned to
+        example: c23-r55-l7, 38
+        readOnly: true
+      pdus:
+        type: string
+        description: PDUs the server is connected to
+        example: pdu-124
+        readOnly: true
+      uplinks:
+        type: string
+        description: netork devices the server is connected to
+        example: netdev-123
+        readOnly: true

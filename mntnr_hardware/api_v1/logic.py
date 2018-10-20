@@ -20,13 +20,13 @@ def datacenter_delete(id):
     datacenter = get_object_or_404(Datacenter, Datacenter.id == id)
     db.session.delete(datacenter)
     db.session.commit()
-    return {'deleted': 'datacenter {}'.format(id)}, 200
+    return {'deleted': 'datacenter {}'.format(id)}
 
 
 @validate_uuid
 def datacenter_detail(id):
     datacenter = get_object_or_404(Datacenter, Datacenter.id == id)
-    return datacenter.serialize(), 201
+    return datacenter.serialize()
 
 
 @validate_uuid
@@ -36,7 +36,7 @@ def datacenter_update(id, datacenter):
         if value:
             setattr(dc, key, value)
     db.session.commit()
-    return dc.serialize(), 201
+    return dc.serialize()
 
 
 def datacenters_list():
@@ -59,18 +59,18 @@ def cabinet_delete(id):
     cabinet = get_object_or_404(Cabinet, Cabinet.id == id)
     db.session.delete(cabinet)
     db.session.commit()
-    return {'deleted': 'cabinet {}'.format(id)}, 200
+    return {'deleted': 'cabinet {}'.format(id)}
 
 
 @validate_uuid
 def cabinet_detail(id):
     cabinet = get_object_or_404(Cabinet, Cabinet.id == id)
-    return cabinet.serialize(detail=True), 200
+    return cabinet.serialize(detail=True)
 
 
 def cabinets_list():
     cabinets = db.session.query(Cabinet).all()
-    return [cabinet.serialize() for cabinet in cabinets], 200
+    return [cabinet.serialize() for cabinet in cabinets]
 
 
 @validate_uuid
@@ -83,7 +83,7 @@ def cabinet_update(id, cabinet):
         if value:
             setattr(cab, key, value)
     db.session.commit()
-    return cab.serialize(), 200
+    return cab.serialize()
 
 
 def cabinet_assignment_create(assignment):
@@ -113,7 +113,7 @@ def cabinet_assignment_delete(id):
 @validate_uuid
 def cabinet_assignment_detail(id):
     assignment = get_object_or_404(CabinetAssignment, CabinetAssignment.id == id)
-    return assignment.serialize(), 200
+    return assignment.serialize()
 
 
 @validate_uuid
@@ -129,12 +129,22 @@ def cabinet_assignment_update(id, assignment):
         if value is not None:
             setattr(assigned, key, value)
     db.session.commit()
-    return assigned.serialize(), 200
+    return assigned.serialize()
 
 
-def servers_list():
-    servers = db.session.query(Server).all()
-    return [server.serialize() for server in servers]
+def server_create(server):
+    server = Server(**server)
+    db.session.add(server)
+    db.session.commit()
+    return server.serialize(), 201
+
+
+@validate_uuid
+def server_delete(id):
+    server = get_object_or_404(Server, Server.id == id)
+    db.session.delete(server)
+    db.session.commit()
+    return {'deleted': 'server {}'.format(id)}
 
 
 @validate_uuid
@@ -143,5 +153,21 @@ def server_detail(id):
     return server.serialize()
 
 
-def server_create():
-    pass
+def servers_list():
+    servers = db.session.query(Server).all()
+    return [server.serialize() for server in servers]
+
+
+@validate_uuid
+def server_update(id, server):
+    server_obj = get_object_or_404(Server, Server.id == id)
+    for key, value in server.items():
+        if value:
+            setattr(server_obj, key, value)
+    db.session.commit()
+    return server_obj.serialize()
+
+
+
+
+
